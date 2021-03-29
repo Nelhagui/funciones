@@ -1,0 +1,164 @@
+//funcion para validar que los campos estén completos
+    function _valido_campos_completos(_id_form, _this = false)
+    {
+        if (_this !== false) 
+        {
+            if (typeof _this !== undefined) 
+            {
+                _spanError = _this.getAttribute('id')
+                if (document.querySelector('[data-error="'+_spanError+'"]') !== null)
+                {
+                    if (typeof document.querySelector('[data-error="'+_spanError+'"]') !== "undefined") 
+                        document.querySelector('[data-error="'+_spanError+'"]').innerText="";
+                }
+
+            }
+        }
+        _docu = document.getElementById(_id_form);
+        inpr = _docu.querySelectorAll('input[required]');
+        if (inpr.length > 0) 
+        {
+            _fa = false;
+            _ar_ids = [];
+            for (var i = 0; i < inpr.length; i++) 
+            {
+                if (inpr[i].value.length == 0)
+                {
+                    _fa = true;
+                    _ar_ids.push(inpr[i].getAttribute('id'));
+                }
+            }
+            if (_fa === false)
+            {
+                //si todos los campos requeridos están completos ahora paso a validar si tienen alguna condicion
+                document.querySelector("[data-id="+_id_form+"]").removeAttribute('disabled')
+                return true;
+            } 
+            else
+            {
+                document.querySelector("[data-id="+_id_form+"]").setAttribute('disabled', true);
+                return false;
+            }
+        }
+    }
+//fin
+
+//funcion para validar el contenido de los inputs
+    function _valido_contenido_inputs(id_a_val, condicion = false)
+    {
+        console.log('validando el contenido de los campos')
+        function verCondicion(_condiciones, _caso)
+        {
+            if (_condiciones.length > 0) 
+            {
+                _hc = false;
+                for (var ii = 0; ii < _condiciones.length; ii++) 
+                {
+                    if (_condiciones[ii].indexOf(_caso.id) !== -1)
+                    {
+                        _hc = true;
+                        _ub = ii;
+                        break;
+                    }
+
+                }
+                if (_hc === true) 
+                {
+                    //proceso condición
+                    _re = {'error': false, 'mensaje': ""};
+                    _rango = _condiciones[_ub].split('rango=')[1];
+                    _des = _rango.split('-')[0];
+                    _has = _rango.split('-')[1];
+                    if (Number(_caso.value.length) < _des || Number(_caso.value.length > _has)) 
+                    {
+                        _re.error = true;
+                        _re.mensaje = "números de caracteres de '"+_des+"' a '"+_has+"'";
+                    }
+                }
+            }
+            return _re;
+        }
+        _con = condicion;
+        _respuesta = {'existe_error': false, 'errores': []};
+        _doc = document.getElementById(id_a_val);
+        inprv = _doc.querySelectorAll('input[required]');
+
+        if (inprv.length > 0) 
+        {
+            for (var i = 0; i < inprv.length; i++) 
+            {
+                _caso = inprv[i].type;
+                switch (_caso) 
+                {
+                    case "email":
+                        if (!$r.esEmail(inprv[i].value))
+                        {
+                            _respuesta.existe_error = true;
+                            _respuesta.errores.push({'id': inprv[i].id, 'mensaje': "Ingrese un email válido"});
+                        }
+                    break;
+
+                    case "text":
+                        // validar requisitos
+                        if (condicion !== false) 
+                        {
+                            _resC = verCondicion (condicion, inprv[i]);
+                            if (_resC.error == true) 
+                            {
+                                _respuesta.existe_error = true;
+                                _respuesta.errores.push({'id': inprv[i].id, 'mensaje': _resC.mensaje});
+                            }
+                        }
+                    break;
+
+                    case "number":
+                        if (!$r.esNumero(inprv[i].value))
+                        {
+                            _respuesta.existe_error = true;
+                            _respuesta.errores.push({'id': inprv[i].id, 'mensaje': "Ingrese un número válido"});
+                        }
+                        else
+                        {
+                            // validar requisitos
+                            if (condicion !== false) 
+                            {
+                                _resC = verCondicion (condicion, inprv[i]);
+                                if (_resC.error == true) 
+                                {
+                                    _respuesta.existe_error = true;
+                                    _respuesta.errores.push({'id': inprv[i].id, 'mensaje': _resC.mensaje});
+                                }
+                            }
+                        }
+                    break;
+
+                    case "password":
+                        //validar requisitos
+                    break;
+
+                    default:
+                        // statements_def
+                    break;
+                }
+            }
+        }
+
+
+
+        if (_respuesta.existe_error) 
+        {
+            if (_respuesta.errores.length > 0) 
+            {
+                for (var i = 0; i < _respuesta.errores.length; i++) 
+                {
+                    _id_input = _respuesta.errores[i].id;
+                    _mensaje = _respuesta.errores[i].mensaje
+                    document.querySelector('[data-error="'+_id_input+'"]').innerText = _mensaje;
+                }
+            }
+        }
+
+
+        return _respuesta.existe_error;
+    }
+//fin
