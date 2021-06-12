@@ -1,0 +1,50 @@
+
+
+//acá se setean los nombres de las columnas en la tabla de los turnos tomados y el nombre de la tabla
+class Turnos
+{
+  constructor(nombre, parametros)
+  {
+    this.parametros = parametros,
+    this.nombreColumna = this.traeNombre(nombre),
+    this.nombreTabla = this.traeNombre("tabla")
+  }
+  traeNombre(nombre)
+  {
+    const _obj =  {
+        fechas: "fecha",
+        profesional: "id_profesional",
+        estudio: "id_estudio",
+        sala: "id_sala",
+        paciente: "id_paciente",
+        tabla: "_preventus_estudios_protocolos"
+      };
+    let _res = _obj[nombre]
+    return _res;  
+  }  
+}
+
+//esta funcion escribe la query para la consulta según los módulos seleccionados
+function VerificoTurnos(parametros) 
+{
+      let condicion = "";
+      for (const property in parametros){
+        condicion += `${parametros[property].nombreColumna} IN (${parametros[property].parametros}) AND `;
+      }
+      condicion = condicion.substring(0,condicion.length - 5);
+      var sql_verifico = `SELECT * FROM ${parametros[0].nombreTabla} WHERE ${condicion}`;
+      return sql_verifico;
+}
+
+
+
+
+
+//////  USO /////
+$parametros = [new Turnos('estudio', [923,919]), new Turnos('profesional', [46,47]) ];
+$turnosTomados = VerificoTurnos($parametros);
+
+////CONSULTA EJEMPLO////
+// SELECT * FROM `nombre_tabla` 
+// WHERE id_estudio IN(923,918) AND id_sala IN(21,8) 
+// AND fecha_turno >= "hoy" AND fecha_turno <= "ultimo dia del mes";
